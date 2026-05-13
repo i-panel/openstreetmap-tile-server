@@ -17,7 +17,7 @@ concurrency:
 env:
   IMAGE : ${{ github.repository_owner }}/openstreetmap-tile-server
   # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
+  REGISTRY: docker.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
 
@@ -161,13 +161,13 @@ jobs:
         platforms: linux/amd64,linux/arm64/v8
 
     -
-      name: Login to GHCR
+      name: Login to Docker Hub
       if: github.event_name != 'pull_request'
       uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
       with:
         registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     # Extract metadata (tags, labels) for Docker
     # https://github.com/docker/metadata-action
