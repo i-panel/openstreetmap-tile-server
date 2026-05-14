@@ -13,12 +13,6 @@ services:
     volumes:
       - ./.data/osm-data:/data/database/
     shm_size: 1gb
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "renderer", "-d", "gis"]
-      interval: 5s
-      timeout: 5s
-      retries: 120
-      start_period: 300s
 
   tileserver-import:
     profiles: ["setup"]
@@ -39,6 +33,3 @@ services:
     ports:
       - "3000:3000"
     command: ["--webui", "enable-for-all"]
-    depends_on:
-      tileserver:
-        condition: service_healthy

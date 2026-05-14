@@ -100,6 +100,8 @@ RUN ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime && echo "$TZ" > /etc/timezo
 
 # Get Noto Emoji Regular font, despite it being deprecated by Google
 COPY NotoEmoji-Regular.ttf /usr/share/fonts/
+COPY NotoEmoji-Bold.ttf /usr/share/fonts/
+COPY NotoSansSyriac-Black.ttf /usr/share/fonts/
 
 # For some reason this one is missing in the default packages
 COPY unifont-Medium.ttf /usr/share/fonts/
