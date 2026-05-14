@@ -1,14 +1,44 @@
-version: '3'
-
 services:
-  map:
-    image: overv/openstreetmap-tile-server
-    volumes:
-      - osm-data:/data/database/
+  tileserver:
+    profiles: ["start"]
+    container_name: tileserver
+    image: borhandarabi/openstreetmap-tile-server:master
+    command: run
     ports:
-      - "8080:80"
-    command: "run"
+      - 5432:5432
+    environment:
+      - UPDATES=enabled
+      - MAX_INTERVAL_SECONDS=900
+      - REPLICATION_URL=http://download.geofabrik.de/asia/iran-updates/
+    volumes:
+      - ./.data/osm-data:/data/database/
+    shm_size: 1gb
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "renderer", "-d", "gis"]
+      interval: 5s
+      timeout: 5s
+      retries: 120
+      start_period: 300s
 
-volumes:
-  osm-data:
-    external: true
+  tileserver-import:
+    profiles: ["setup"]
+    image: borhandarabi/openstreetmap-tile-server:master
+    command: import
+    environment:
+      - DOWNLOAD_POLY=http://download.geofabrik.de/asia/iran.poly
+      - DOWNLOAD_PBF=http://download.geofabrik.de/asia/iran-latest.osm.pbf
+    volumes:
+      - ./.data/osm-data:/data/database/
+    shm_size: 1gb
+
+  tileserver-martin:
+    profiles: ["run"]
+    image: ghcr.io/maplibre/martin:1.9.1
+    environment:
+      - DATABASE_URL=postgres://_renderd:_renderd@tileserver:5432/gis
+    ports:
+      - "3000:3000"
+    command: ["--webui", "enable-for-all"]
+    depends_on:
+      tileserver:
+        condition: service_healthy
